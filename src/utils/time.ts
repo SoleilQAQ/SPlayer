@@ -138,3 +138,13 @@ export const isBeforeSixAM = (timestamp: number) => {
 export const convertToLocalTime = (isoString: string): string => {
   return dayjs(isoString).format("YYYY-MM-DD HH:mm:ss");
 };
+
+/**
+ * 将秒转为 分：秒
+ * @param seconds 秒数
+ * @returns 分：秒格式的字符串
+ */
+export const convertSecondsToTime = (seconds: number): string => {
+  // 需要补零
+  return dayjs.duration(seconds, "seconds").format("mm:ss");
+};

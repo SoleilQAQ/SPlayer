@@ -49,8 +49,12 @@ const settingStore = useSettingStore();
 // 操作系统主题
 const osTheme = useOsTheme();
 
-// 全局主题
-const themeOverrides = ref<GlobalThemeOverrides>({});
+// 全局主题（使用 shallowRef 避免深层追踪开销）
+const themeOverrides = shallowRef<GlobalThemeOverrides>({});
+// 轻量的 rgba 构造器
+const toRGBA = (rgb: string, alpha: number) => `rgba(${rgb}, ${alpha})`;
+// 主题缓存键
+let lastThemeCacheKey: string | null = null;
 
 // 获取明暗模式
 const theme = computed(() => {
@@ -88,121 +92,136 @@ const changeGlobalTheme = () => {
       themeOverrides.value = {};
       return;
     }
-    // 修改主题
-    themeOverrides.value = settingStore.themeGlobalColor
-      ? {
-          common: {
-            fontFamily: `${settingStore.globalFont === "default" ? "v-sans" : settingStore.globalFont}, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-            primaryColor: `rgb(${colorSchemes.primary})`,
-            primaryColorHover: `rgba(${colorSchemes.primary}, 0.78)`,
-            primaryColorPressed: `rgba(${colorSchemes.primary}, 0.26)`,
-            primaryColorSuppl: `rgba(${colorSchemes.primary}, 0.12)`,
-            textColorBase: colorSchemes.primary,
-            textColor1: `rgb(${colorSchemes.primary})`,
-            textColor2: `rgba(${colorSchemes.primary}, 0.82)`,
-            textColor3: `rgba(${colorSchemes.primary}, 0.52)`,
-            bodyColor: `rgb(${colorSchemes.background})`,
-            cardColor: `rgb(${colorSchemes["surface-container"]})`,
-            tagColor: `rgb(${colorSchemes["surface-container"]})`,
-            modalColor: `rgb(${colorSchemes["surface-container"]})`,
-            popoverColor: `rgb(${colorSchemes["surface-container"]})`,
-            buttonColor2: `rgba(${colorSchemes.primary}, 0.08)`,
-            buttonColor2Hover: `rgba(${colorSchemes.primary}, 0.12)`,
-            buttonColor2Pressed: `rgba(${colorSchemes.primary}, 0.08)`,
-            iconColor: `rgb(${colorSchemes.primary})`,
-            iconColorHover: `rgba(${colorSchemes.primary}, 0.475)`,
-            closeIconColor: `rgba(${colorSchemes.primary}, 0.58)`,
-            hoverColor: `rgba(${colorSchemes.primary}, 0.09)`,
-            borderColor: `rgba(${colorSchemes.primary}, 0.09)`,
-            textColorDisabled: `rgba(${colorSchemes.primary}, 0.3)`,
-            placeholderColorDisabled: `rgba(${colorSchemes.primary}, 0.3)`,
-            iconColorDisabled: `rgba(${colorSchemes.primary}, 0.3)`,
-          },
-          Card: {
-            borderColor: `rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Button: {
-            textColorHover: `rgba(${colorSchemes.primary}, 0.78)`,
-            textColorFocus: `rgba(${colorSchemes.primary}, 0.58)`,
-            colorPrimary: `rgba(${colorSchemes.primary}, 0.9)`,
-            colorHoverPrimary: `rgb(${colorSchemes.primary})`,
-            colorPressedPrimary: `rgba(${colorSchemes.primary}, 0.8)`,
-            colorFocusPrimary: `rgb(${colorSchemes.primary})`,
-          },
-          Slider: {
-            handleColor: `rgb(${colorSchemes.primary})`,
-            fillColor: `rgb(${colorSchemes.primary})`,
-            fillColorHover: `rgb(${colorSchemes.primary})`,
-            railColor: `rgba(${colorSchemes.primary}, 0.2)`,
-            railColorHover: `rgba(${colorSchemes.primary}, 0.3)`,
-          },
-          Switch: {
-            railColorActive: `rgba(${colorSchemes.primary}, 0.8)`,
-          },
-          Input: {
-            color: `rgba(${colorSchemes.primary}, 0.1)`,
-            colorFocus: `rgb(${colorSchemes["surface-container"]})`,
-            placeholderColor: `rgba(${colorSchemes.primary}, 0.58)`,
-            border: `1px solid rgba(${colorSchemes.primary}, 0.1)`,
-            clearColor: `rgba(${colorSchemes.primary}, 0.38)`,
-            clearColorHover: `rgba(${colorSchemes.primary}, 0.48)`,
-            clearColorPressed: `rgba(${colorSchemes.primary}, 0.3)`,
-          },
-          Icon: {
-            color: `rgb(${colorSchemes.primary})`,
-          },
-          Empty: {
-            textColor: `rgba(${colorSchemes.primary}, 0.38)`,
-          },
-          Divider: {
-            color: `rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Dropdown: {
-            dividerColor: `rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Layout: {
-            siderBorderColor: `rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Tabs: {
-            colorSegment: `rgba(${colorSchemes.primary}, 0.08)`,
-            tabColorSegment: `rgba(${colorSchemes.primary}, 0.12)`,
-          },
-          Drawer: {
-            headerBorderBottom: `1px solid rgba(${colorSchemes.primary}, 0.09)`,
-            footerBorderTop: `1px solid rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Menu: {
-            dividerColor: `rgba(${colorSchemes.primary}, 0.09)`,
-          },
-          Progress: {
-            railColor: `rgba(${colorSchemes.primary}, 0.16)`,
-          },
-          Popover: {
-            color: `rgb(${colorSchemes["surface-container"]})`,
-          },
-        }
-      : {
-          common: {
-            fontFamily: `${settingStore.globalFont === "default" ? "v-sans" : settingStore.globalFont}, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-            primaryColor: `rgb(${colorSchemes.primary})`,
-            primaryColorHover: `rgba(${colorSchemes.primary}, 0.78)`,
-            primaryColorPressed: `rgba(${colorSchemes.primary}, 0.26)`,
-            primaryColorSuppl: `rgba(${colorSchemes.primary}, 0.12)`,
-          },
-          Icon: {
-            color: `rgb(${colorSchemes.primary})`,
-          },
-          Slider: {
-            handleColor: `rgb(${colorSchemes.primary})`,
-            fillColor: `rgb(${colorSchemes.primary})`,
-            fillColorHover: `rgb(${colorSchemes.primary})`,
-            railColor: `rgba(${colorSchemes.primary}, 0.2)`,
-            railColorHover: `rgba(${colorSchemes.primary}, 0.3)`,
-          },
-          Popover: {
-            color: `rgb(${colorSchemes["surface-container"]})`,
-          },
-        };
+    // 构造主题缓存 Key
+    const themeModeLabel = theme.value ? "dark" : "light";
+    const themeCacheKey = `${themeModeLabel}|${settingStore.themeGlobalColor ? 1 : 0}|${settingStore.globalFont}|${colorSchemes.primary}|${colorSchemes.background}|${colorSchemes["surface-container"]}`;
+    if (lastThemeCacheKey === themeCacheKey) return;
+    lastThemeCacheKey = themeCacheKey;
+
+    // 关键颜色
+    const primaryRGB = colorSchemes.primary as string;
+    const surfaceContainerRGB = colorSchemes["surface-container"] as string;
+
+    // 全局字体
+    const fontFamily = `${settingStore.globalFont === "default" ? "v-sans" : settingStore.globalFont}, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
+
+    // 通用样式基座
+    const commonBase = {
+      fontFamily,
+      primaryColor: `rgb(${primaryRGB})`,
+      primaryColorHover: toRGBA(primaryRGB, 0.78),
+      primaryColorPressed: toRGBA(primaryRGB, 0.26),
+      primaryColorSuppl: toRGBA(primaryRGB, 0.12),
+    } as GlobalThemeOverrides["common"];
+
+    if (settingStore.themeGlobalColor) {
+      themeOverrides.value = {
+        common: {
+          ...commonBase,
+          textColorBase: primaryRGB,
+          textColor1: `rgb(${primaryRGB})`,
+          textColor2: toRGBA(primaryRGB, 0.82),
+          textColor3: toRGBA(primaryRGB, 0.52),
+          bodyColor: `rgb(${colorSchemes.background})`,
+          cardColor: `rgb(${surfaceContainerRGB})`,
+          tagColor: `rgb(${surfaceContainerRGB})`,
+          modalColor: `rgb(${surfaceContainerRGB})`,
+          popoverColor: `rgb(${surfaceContainerRGB})`,
+          buttonColor2: toRGBA(primaryRGB, 0.08),
+          buttonColor2Hover: toRGBA(primaryRGB, 0.12),
+          buttonColor2Pressed: toRGBA(primaryRGB, 0.08),
+          iconColor: `rgb(${primaryRGB})`,
+          iconColorHover: toRGBA(primaryRGB, 0.475),
+          closeIconColor: toRGBA(primaryRGB, 0.58),
+          hoverColor: toRGBA(primaryRGB, 0.09),
+          borderColor: toRGBA(primaryRGB, 0.09),
+          textColorDisabled: toRGBA(primaryRGB, 0.3),
+          placeholderColorDisabled: toRGBA(primaryRGB, 0.3),
+          iconColorDisabled: toRGBA(primaryRGB, 0.3),
+        },
+        Card: {
+          borderColor: toRGBA(primaryRGB, 0.09),
+        },
+        Button: {
+          textColorHover: toRGBA(primaryRGB, 0.78),
+          textColorFocus: toRGBA(primaryRGB, 0.58),
+          colorPrimary: toRGBA(primaryRGB, 0.9),
+          colorHoverPrimary: `rgb(${primaryRGB})`,
+          colorPressedPrimary: toRGBA(primaryRGB, 0.8),
+          colorFocusPrimary: `rgb(${primaryRGB})`,
+        },
+        Slider: {
+          handleColor: `rgb(${primaryRGB})`,
+          fillColor: `rgb(${primaryRGB})`,
+          fillColorHover: `rgb(${primaryRGB})`,
+          railColor: toRGBA(primaryRGB, 0.2),
+          railColorHover: toRGBA(primaryRGB, 0.3),
+        },
+        Switch: {
+          railColorActive: toRGBA(primaryRGB, 0.8),
+        },
+        Input: {
+          color: toRGBA(primaryRGB, 0.1),
+          colorFocus: `rgb(${surfaceContainerRGB})`,
+          placeholderColor: toRGBA(primaryRGB, 0.58),
+          border: `1px solid ${toRGBA(primaryRGB, 0.1)}`,
+          clearColor: toRGBA(primaryRGB, 0.38),
+          clearColorHover: toRGBA(primaryRGB, 0.48),
+          clearColorPressed: toRGBA(primaryRGB, 0.3),
+        },
+        Icon: {
+          color: `rgb(${primaryRGB})`,
+        },
+        Empty: {
+          textColor: toRGBA(primaryRGB, 0.38),
+        },
+        Divider: {
+          color: toRGBA(primaryRGB, 0.09),
+        },
+        Dropdown: {
+          dividerColor: toRGBA(primaryRGB, 0.09),
+        },
+        Layout: {
+          siderBorderColor: toRGBA(primaryRGB, 0.09),
+        },
+        Tabs: {
+          colorSegment: toRGBA(primaryRGB, 0.08),
+          tabColorSegment: toRGBA(primaryRGB, 0.12),
+        },
+        Drawer: {
+          headerBorderBottom: `1px solid ${toRGBA(primaryRGB, 0.09)}`,
+          footerBorderTop: `1px solid ${toRGBA(primaryRGB, 0.09)}`,
+        },
+        Menu: {
+          dividerColor: toRGBA(primaryRGB, 0.09),
+        },
+        Progress: {
+          railColor: toRGBA(primaryRGB, 0.16),
+        },
+        Popover: {
+          color: `rgb(${surfaceContainerRGB})`,
+        },
+      };
+    } else {
+      themeOverrides.value = {
+        common: {
+          ...commonBase,
+        },
+        Icon: {
+          color: `rgb(${primaryRGB})`,
+        },
+        Slider: {
+          handleColor: `rgb(${primaryRGB})`,
+          fillColor: `rgb(${primaryRGB})`,
+          fillColorHover: `rgb(${primaryRGB})`,
+          railColor: toRGBA(primaryRGB, 0.2),
+          railColorHover: toRGBA(primaryRGB, 0.3),
+        },
+        Popover: {
+          color: `rgb(${surfaceContainerRGB})`,
+        },
+      };
+    }
   } catch (error) {
     themeOverrides.value = {};
     console.error("切换主题色出现错误：", error);

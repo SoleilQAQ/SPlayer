@@ -65,6 +65,23 @@ export const songLyric = (id: number) => {
   });
 };
 
+// 获取格式TTML的歌词
+export const songLyricTTML = async (id: number) => {
+const url = `https://amll-ttml-db.stevexmh.net/ncm/${id}`;
+  try {
+    const response = await fetch(url);
+    if (response === null || response.status !== 200) {
+      console.error(`TTML API请求失败或TTML仓库没有歌词, 将会使用默认歌词`);
+      return null;
+    }
+    const data = await response.text();
+    return data;
+  } catch (error) {
+    console.error('TTML API请求出错:', error);
+    return null;
+  }
+}
+
 /**
  * 获取歌曲下载链接
  * @param id 音乐 id

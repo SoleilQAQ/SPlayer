@@ -10,6 +10,7 @@ export interface StoreType {
     height: number;
     x?: number;
     y?: number;
+    maximized?: boolean;
   };
   lyric: {
     fontSize: number;

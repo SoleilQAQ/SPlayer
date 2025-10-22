@@ -1,9 +1,14 @@
 import { type RouteRecordRaw } from "vue-router";
+import AppLayout from "@/layout/AppLayout.vue";
 
-const routes: Array<RouteRecordRaw> = [
+/**
+ * 应用路由
+ * @returns {Array<RouteRecordRaw>} 应用路由
+ */
+const appRoutes: Array<RouteRecordRaw> = [
   // 首页
   {
-    path: "",
+    path: "/",
     name: "home",
     component: () => import("@/views/Home/index.vue"),
   },
@@ -266,6 +271,19 @@ const routes: Array<RouteRecordRaw> = [
     path: "/500",
     name: "500",
     component: () => import("@/views/Status/500.vue"),
+  },
+];
+
+/**
+ * 路由配置
+ * @returns {Array<RouteRecordRaw>} 路由配置
+ */
+const routes: Array<RouteRecordRaw> = [
+  // 应用路由
+  {
+    path: "/",
+    component: AppLayout,
+    children: [...appRoutes],
   },
 ];
 

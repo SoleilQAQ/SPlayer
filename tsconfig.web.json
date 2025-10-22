@@ -5,15 +5,20 @@
     "src/**/*",
     "src/**/*.vue",
     "electron/main/index.d.ts",
-    "electron/preload/index.d.ts"
-, "dist/lastfm.ts"  ],
+    "electron/preload/index.d.ts",
+    "dist/lastfm.ts"
+  ],
   "compilerOptions": {
     "composite": true,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
     "maxNodeModuleJsDepth": 2,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["node", "electron", "electron-vite/node", "./auto-imports.d.ts", "./components.d.ts"]
+    "types": ["node", "electron", "electron-vite/node", "./auto-imports.d.ts"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "es2022"
   }
 }

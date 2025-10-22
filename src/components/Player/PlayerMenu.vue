@@ -38,7 +38,7 @@ const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 <style lang="scss" scoped>
 .player-menu {
   width: 100%;
-  height: 80px;
+  min-height: 80px;
   overflow: hidden;
   z-index: 100;
   cursor: pointer;

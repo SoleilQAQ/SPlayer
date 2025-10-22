@@ -1,9 +1,9 @@
 import { app, shell, BrowserWindow, BrowserWindowConstructorOptions } from "electron";
-import { electronApp, optimizer } from "@electron-toolkit/utils";
+import { electronApp } from "@electron-toolkit/utils";
 import { join } from "path";
 import { release, type } from "os";
-import { isDev, isMac, appName } from "./utils";
-import { registerAllShortcuts, unregisterShortcuts } from "./shortcut";
+import { isDev, isMac, appName, isLinux } from "./utils";
+import { unregisterShortcuts } from "./shortcut";
 import { initTray, MainTray } from "./tray";
 import { initThumbar, Thumbar } from "./thumbar";
 import { type StoreType, initStore } from "./store";
@@ -75,8 +75,6 @@ class MainProcess {
         this.thumbar,
         this.store,
       );
-      // 注册快捷键
-      registerAllShortcuts(this.mainWindow!);
     });
   }
   // 创建窗口
@@ -118,8 +116,8 @@ class MainProcess {
     const options: BrowserWindowConstructorOptions = {
       width: this.store?.get("window").width,
       height: this.store?.get("window").height,
-      minHeight: 800,
-      minWidth: 1280,
+      minHeight: 600,
+      minWidth: 800,
       // 菜单栏
       titleBarStyle: "customButtonsOnHover",
       // 立即显示窗口
@@ -218,11 +216,6 @@ class MainProcess {
       this.showWindow();
     });
 
-    // 开发环境控制台
-    app.on("browser-window-created", (_, window) => {
-      optimizer.watchWindowShortcuts(window);
-    });
-
     // 自定义协议
     app.on("open-url", (_, url) => {
       console.log("Received custom protocol URL:", url);
@@ -251,7 +244,7 @@ class MainProcess {
     this.mainWindow?.on("focus", () => {
       this.saveBounds();
     });
-    // 移动或缩放
+    // 移动、缩放、最大化、取消最大化
     this.mainWindow?.on("resized", () => {
       // 若处于全屏则不保存
       if (this.mainWindow?.isFullScreen()) return;
@@ -260,6 +253,24 @@ class MainProcess {
     this.mainWindow?.on("moved", () => {
       this.saveBounds();
     });
+    this.mainWindow?.on("maximize", () => {
+      this.saveBounds();
+    });
+    this.mainWindow?.on("unmaximize", () => {
+      this.saveBounds();
+    })
+
+    // Linux 无法使用 resized 和 moved
+    if (isLinux) {
+      this.mainWindow?.on("resize", () => {
+        // 若处于全屏则不保存
+        if (this.mainWindow?.isFullScreen()) return;
+        this.saveBounds();
+      })
+      this.mainWindow?.on("move", () => {
+        this.saveBounds();
+      });
+    }
 
     // 歌词窗口缩放
     this.lyricWindow?.on("resized", () => {
@@ -283,8 +294,11 @@ class MainProcess {
   // 更新窗口大小
   saveBounds() {
     if (this.mainWindow?.isFullScreen()) return;
-    const bounds = this.mainWindow?.getBounds();
-    if (bounds) this.store?.set("window", bounds);
+    const bounds: any = this.mainWindow?.getBounds();
+    if (bounds) {
+      bounds.maximized = this.mainWindow?.isMaximized();
+      this.store?.set("window", bounds);
+    }
   }
   // 显示窗口
   showWindow() {

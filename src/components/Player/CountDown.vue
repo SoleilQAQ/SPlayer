@@ -18,6 +18,10 @@
 </template>
 
 <script setup lang="ts">
+import { useSettingStore } from "@/stores";
+
+const settingStore = useSettingStore();
+
 const props = defineProps<{
   // 开始时间
   start: number;
@@ -31,6 +35,7 @@ const props = defineProps<{
 
 // 是否显示
 const isShow = computed(() => {
+  if (!settingStore.countDownShow) return false;
   // 计算实时时间 - 0.5是否小于开始 + 持续时间，小于则显示，否则不显示
   return props.seek + 0.5 < props.start + props.duration;
 });

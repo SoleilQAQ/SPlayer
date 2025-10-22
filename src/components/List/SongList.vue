@@ -360,7 +360,6 @@ onBeforeUnmount(() => {
     }
     .meta {
       width: 50px;
-      font-size: 13px;
       text-align: center;
       &.size {
         width: 60px;

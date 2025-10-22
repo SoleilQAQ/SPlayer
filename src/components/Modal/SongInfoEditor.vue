@@ -190,29 +190,29 @@ const getSongInfo = async () => {
     common: ICommonTagsResult;
     format: IFormat;
     md5: string;
+    lyric?: string;
   } = await window.electron.ipcRenderer.invoke("get-music-metadata", path);
-  // console.log(infoData);
   // 解构数据
-  const { fileName, fileSize, common, format, md5 } = infoData;
+  const { fileName, fileSize, common, format, md5, lyric } = infoData;
   // 更新数据
   infoFormData.value = {
-    fileName,
-    name: common.title || "",
-    artist: common.artist || "",
-    album: common.album || "",
-    alia: common.comment?.[0] || "",
-    lyric: common.lyrics?.[0] || "",
-    type: format.codec,
+    fileName: String(fileName),
+    name: String(common.title ?? ""),
+    artist: String(common.artist ?? ""),
+    album: String(common.album ?? ""),
+    alia: String(common.comment?.[0]?.text ?? ""),
+    lyric: String(lyric ?? ""),
+    type: String(format.codec ?? ""),
     duration: format.duration ? Number(format.duration.toFixed(2)) : 0,
     size: fileSize,
     br: format.bitrate ? Math.floor(format.bitrate / 1000 || 0) : 0,
     frequency: format.sampleRate,
-    md5,
+    md5: String(md5),
   };
   // 获取封面
   const coverBuff = common.picture?.[0]?.data || "";
   const coverType = common.picture?.[0]?.format || "";
-  if (coverBuff) coverData.value = blob.createBlobURL(coverBuff, coverType, path);
+  if (coverBuff) coverData.value = blob.createBlobURL(coverBuff as Buffer, coverType, path);
 };
 
 // 在线匹配
@@ -262,7 +262,7 @@ const onlineMatch = debounce(
 const changeCover = async () => {
   const newPath = await window.electron.ipcRenderer.invoke("choose-image");
   if (!newPath) return;
-  coverData.value = newPath;
+  coverData.value = `file://${newPath}`;
 };
 
 // 实时修改列表
@@ -300,7 +300,9 @@ const saveSongInfo = debounce(async (song: SongType) => {
       cover:
         coverData.value.startsWith("blob:") || coverData.value === "/images/song.jpg?assest"
           ? null
-          : coverData.value,
+          : coverData.value.startsWith("file://")
+            ? coverData.value.replace(/^file:\/\//, "")
+            : coverData.value,
     };
     console.log(song.path, metadata);
     await window.electron.ipcRenderer.invoke("set-music-metadata", song.path, metadata);

@@ -83,13 +83,15 @@ server.interceptors.response.use(
         // 处理其他状态码或错误条件
         console.error("未处理的错误：", error.message);
     }
-    window.$notification.error({
-      title: "请求错误",
-      description: `状态码: ${response?.status || ""}`,
-      content: (response && (response.data as { message?: string }).message) || error.message,
-      meta: "若持续发生，可尝试软件热重载",
-      duration: 5000,
-    });
+    // window.$notification.error({
+    //   title: "请求错误",
+    //   description: `状态码: ${response?.status || ""}`,
+    //   content: (response && (response.data as { message?: string }).message) || error.message,
+    //   meta: "若持续发生，可尝试软件热重载",
+    //   duration: 5000,
+    // });
+    // 控制台输出
+    window.$message.warning("请求出错，若持续发生，可尝试软件热重载");
     // 返回错误
     return Promise.reject(error);
   },

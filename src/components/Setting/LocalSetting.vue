@@ -22,7 +22,7 @@
             <n-text class="name">本地歌曲目录</n-text>
             <n-text class="tip" :depth="3">可在此增删本地歌曲目录，歌曲增删实时同步</n-text>
           </div>
-          <n-button strong secondary @click="changeLocalPath()">
+          <n-button strong secondary @click="changeLocalMusicPath()">
             <template #icon>
               <SvgIcon name="Folder" />
             </template>
@@ -38,7 +38,40 @@
             <div class="label">
               <n-text class="name">{{ item }}</n-text>
             </div>
-            <n-button strong secondary @click="changeLocalPath(index)">
+            <n-button strong secondary @click="changeLocalMusicPath(index)">
+              <template #icon>
+                <SvgIcon name="Delete" />
+              </template>
+            </n-button>
+          </n-card>
+        </n-collapse-transition>
+      </n-card>
+      <n-card class="set-item" id="local-list-choose" content-style="flex-direction: column">
+        <n-flex justify="space-between">
+          <div class="label">
+            <n-text class="name">本地歌词覆盖在线歌词</n-text>
+            <n-text class="tip" :depth="3"
+              >可在这些文件夹内覆盖在线歌曲的歌词，将歌词文件命名为 `歌曲ID.后缀名` 即可，支持 LRC
+              和 TTML 格式</n-text
+            >
+          </div>
+          <n-button strong secondary @click="changeLocalLyricPath()">
+            <template #icon>
+              <SvgIcon name="Folder" />
+            </template>
+            更改
+          </n-button>
+        </n-flex>
+        <n-collapse-transition :show="settingStore.localLyricPath.length > 0">
+          <n-card
+            v-for="(item, index) in settingStore.localLyricPath"
+            :key="index"
+            class="set-item"
+          >
+            <div class="label">
+              <n-text class="name">{{ item }}</n-text>
+            </div>
+            <n-button strong secondary @click="changeLocalLyricPath(index)">
               <template #icon>
                 <SvgIcon name="Delete" />
               </template>
@@ -125,7 +158,7 @@
 
 <script setup lang="ts">
 import { useSettingStore } from "@/stores";
-import { changeLocalPath } from "@/utils/helper";
+import { changeLocalLyricPath, changeLocalMusicPath } from "@/utils/helper";
 
 const settingStore = useSettingStore();
 

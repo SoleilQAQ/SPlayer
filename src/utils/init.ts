@@ -32,6 +32,10 @@ const init = async () => {
   );
   // 同步播放模式
   player.playModeSyncIpc();
+  // 初始化自动关闭定时器
+  if (statusStore.autoClose.enable) {
+    player.startAutoCloseTimer(statusStore.autoClose.time, statusStore.autoClose.remainTime);
+  }
 
   if (isElectron) {
     // 注册全局快捷键

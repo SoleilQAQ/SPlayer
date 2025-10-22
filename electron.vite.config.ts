@@ -88,7 +88,7 @@ export default defineConfig(({ command, mode }) => {
           "/api": {
             target: `http://127.0.0.1:${servePort}`,
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/api/, "/api/"),
+            rewrite: (path) => path.replace(/^\/api/, "/api"),
           },
         },
       },

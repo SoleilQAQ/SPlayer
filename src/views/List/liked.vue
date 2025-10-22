@@ -178,7 +178,7 @@ import { debounce, isObject } from "lodash-es";
 import { useDataStore, useStatusStore } from "@/stores";
 import { openBatchList, openUpdatePlaylist } from "@/utils/modal";
 import { formatTimestamp } from "@/utils/time";
-import { isLogin } from "@/utils/auth";
+import { isLogin, updateUserLikePlaylist } from "@/utils/auth";
 import player from "@/utils/player";
 
 const router = useRouter();
@@ -408,9 +408,32 @@ onDeactivated(() => loadingMsgShow(false));
 onUnmounted(() => loadingMsgShow(false));
 
 onMounted(async () => {
-  const data: any = await dataStore.getUserLikePlaylist();
-  const id = data?.detail?.id;
-  if (id) getPlaylistDetail(id);
+  // 首先确保用户歌单数据已加载
+  if (!dataStore.userLikeData.playlists?.length) {
+    try {
+      await updateUserLikePlaylist();
+    } catch (error) {
+      console.error("Failed to update user playlist data:", error);
+      loading.value = false;
+      return;
+    }
+  }
+  
+  // 获取我喜欢的音乐歌单ID
+  const likedPlaylistId = dataStore.userLikeData.playlists?.[0]?.id;
+  if (likedPlaylistId) {
+    getPlaylistDetail(likedPlaylistId);
+  } else {
+    // 如果没有找到我喜欢的音乐歌单，尝试从缓存获取
+    const data: any = await dataStore.getUserLikePlaylist();
+    const id = data?.detail?.id;
+    if (id) {
+      getPlaylistDetail(id);
+    } else {
+      loading.value = false;
+      window.$message.error("无法获取我喜欢的音乐歌单");
+    }
+  }
 });
 </script>
 

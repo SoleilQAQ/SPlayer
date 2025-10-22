@@ -74,14 +74,11 @@
           <!-- 歌词 -->
           <div v-else-if="musicStore.isHasLrc" class="content-right">
             <!-- 数据 -->
-            <!-- <PlayerData
-              v-if="
-                (statusStore.pureLyricMode && musicStore.isHasLrc) ||
-                (settingStore.playerType === 'record' && musicStore.isHasLrc)
-              "
+            <PlayerData
+              v-if="statusStore.pureLyricMode && musicStore.isHasLrc"
               :center="statusStore.pureLyricMode"
-              :theme="mainColor"
-            /> -->
+              :theme="statusStore.mainColor"
+            />
             <!-- 歌词 -->
             <MainAMLyric v-if="settingStore.useAMLyrics" />
             <MainLyric v-else />
